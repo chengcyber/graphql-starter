@@ -10,10 +10,11 @@ const {
   GraphQLID,
   GraphQLInt,
   GraphQLString,
-  GraphQLBoolean
+  GraphQLBoolean,
+  GraphQLList
 } = require('graphql');
 
-const { getVideoById } = require('./src/data');
+const { getVideoById, getVideos } = require('./src/data');
 
 const videoType = new GraphQLObjectType({
   name: 'VideoType',
@@ -42,6 +43,10 @@ const queryType = new GraphQLObjectType({
   name: 'QueryType',
   description: 'The root query type',
   fields: {
+    videos: {
+      type: new GraphQLList(videoType),
+      resolve: getVideos
+    },
     video: {
       type: videoType,
       args: {
