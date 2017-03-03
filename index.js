@@ -14,7 +14,7 @@ const {
   GraphQLList
 } = require('graphql');
 
-const { getVideoById, getVideos } = require('./src/data');
+const { getVideoById, getVideos, createVideo } = require('./src/data');
 
 const videoType = new GraphQLObjectType({
   name: 'VideoType',
@@ -60,8 +60,34 @@ const queryType = new GraphQLObjectType({
   },
 });
 
+const mutationType = new GraphQLObjectType({
+  name: 'MutationType',
+  description: 'The root Mutation Type',
+  fields: {
+    createVideo: {
+      type: videoType,
+      args: {
+        title: {
+          type: new GraphQLNonNull(GraphQLString),
+          description: 'The title of the video',
+        },
+        duration: {
+          type: new GraphQLNonNull(GraphQLInt),
+          description: 'The duration of the video(in seconds)',
+        },
+        released: {
+          type: new GraphQLNonNull(GraphQLBoolean),
+          description: 'Whether or not the video is released',
+        },
+      },
+      resolve: (_, args) => createVideo(args)
+    },
+  },
+});
+
 const schema = new GraphQLSchema({
-  query: queryType
+  query: queryType,
+  mutation: mutationType,
 });
 
 /**
