@@ -16,13 +16,24 @@ const {
 } = require('graphql');
 
 const { getVideoById, getVideos, createVideo } = require('./src/data');
+const { nodeInterface } = require('./src/node');
+
+// const instructorType = new GraphQLObjectType({
+//   fields: {
+//     id: {
+//       type: GraphQLID,
+//       description: 'The id of the instructor',
+//     },
+//   },
+//   interfaces: [nodeInterface],
+// });
 
 const videoType = new GraphQLObjectType({
   name: 'VideoType',
   description: 'A Video on Egghead.io',
   fields: {
     id: {
-      type: GraphQLID,
+      type: new GraphQLNonNull(GraphQLID),
       description: 'The id of the video',
     },
     title: {
@@ -37,8 +48,10 @@ const videoType = new GraphQLObjectType({
       type: GraphQLBoolean,
       description: 'Whether or not the viewer has watched this video',
     },
-  }
+  },
+  interfaces: [nodeInterface],
 });
+exports.videoType = videoType;
 
 const queryType = new GraphQLObjectType({
   name: 'QueryType',
