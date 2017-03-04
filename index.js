@@ -16,7 +16,12 @@ const {
 } = require('graphql');
 
 const { getVideoById, getVideos, createVideo } = require('./src/data');
-const { globalIdField } = require('graphql-relay');
+const {
+  globalIdField,
+  connectionDefinitions,
+  connectionArgs,
+  connectionFromPromisedArray,
+} = require('graphql-relay');
 const { nodeInterface, nodeField } = require('./src/node');
 
 const videoType = new GraphQLObjectType({
@@ -41,14 +46,31 @@ const videoType = new GraphQLObjectType({
 });
 exports.videoType = videoType;
 
+const { connectionType: VideoConnection } = connectionDefinitions({
+  nodeType: videoType,
+  connectionFields: () => ({
+    totalCount: {
+      type: GraphQLInt,
+      description: 'A count of total number of objects in this connection',
+      resolve: (conn) => {
+        return conn.edges.length;
+      }
+    },
+  }),
+});
+
 const queryType = new GraphQLObjectType({
   name: 'QueryType',
   description: 'The root query type',
   fields: {
     node: nodeField,
     videos: {
-      type: new GraphQLList(videoType),
-      resolve: getVideos
+      type: VideoConnection,
+      args: connectionArgs,
+      resolve: (_, args) => connectionFromPromisedArray(
+        getVideos(),
+        args
+      )
     },
     video: {
       type: videoType,
@@ -115,5 +137,7 @@ server.use('/graphql', graphHTTP({
   graphiql: true,
 }));
 
-server.listen(port, () => console.log(`Graphql Server running on ${port}`));
+server.listen(port, () => 
+  console.log(`Graphql Server running on http://localhost:${port}/graphql`)
+);
 
